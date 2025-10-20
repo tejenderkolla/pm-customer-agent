@@ -1,0 +1,6 @@
+# requirements.txt
+streamlit
+crewai
+crewai[tools]
+pandas
+langchain-openai
