@@ -25,7 +25,7 @@ try:
 except KeyError:
     # This stops the app if the key is missing from the file
     st.error("🚨 GOOGLE_API_KEY not found. Please check your .streamlit/secrets.toml file.", icon="🚨")
-    st.stop() # <-- THIS IS THE FIX
+    st.stop() 
 
 except Exception as e:
     # This stops the app if the key is wrong or another error happens
@@ -34,7 +34,7 @@ except Exception as e:
     print(f"!!!!!!!!!!!!!! REAL ERROR FROM GOOGLE !!!!!!!!!!!!!!")
     print(e)
     print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    st.stop() # <-- THIS IS THE FIX
+    st.stop() 
 
 # --- Agent Definitions ---
 # Agent 1: The Triage Specialist
