@@ -4,3 +4,4 @@ crewai
 crewai[tools]
 pandas
 langchain-openai
+langchain-google-genai

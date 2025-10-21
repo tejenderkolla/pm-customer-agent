@@ -2,20 +2,39 @@ import streamlit as st
 import pandas as pd
 from crewai import Agent, Task, Crew, Process
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Voice of the Customer AI Agent", layout="wide")
 st.title("🤖 Voice of the Customer (VoC) Synthesis Agent")
 st.markdown("Upload your customer feedback CSV, and the AI crew will analyze it for you.")
 
-# --- API Key Setup ---
 # Load the API key from Streamlit's secrets
+# --- API Key Setup ---
 try:
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4o")
+    google_api_key = st.secrets["GOOGLE_API_KEY"]
+    print("##########googleAPIKEY#######",google_api_key)
+    print(f"DEBUG: Key retrieved successfully! Key starts with: {google_api_key[:4]}")
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest",
+                                 google_api_key=google_api_key,
+                                 convert_system_message_to_human=True)
+    
+    # This will print "DEBUG: LLM object..." to your terminal if it works
+    print("DEBUG: LLM object created successfully!")
+
 except KeyError:
-    st.error("OPENAI_API_KEY not found. Please add it to your Streamlit secrets.", icon="🚨")
-    st.stop()
+    # This stops the app if the key is missing from the file
+    st.error("🚨 GOOGLE_API_KEY not found. Please check your .streamlit/secrets.toml file.", icon="🚨")
+    st.stop() # <-- THIS IS THE FIX
+
+except Exception as e:
+    # This stops the app if the key is wrong or another error happens
+    st.error(f"🚨 An error occurred while initializing the AI: {e}", icon="🚨")
+    # THIS WILL SHOW YOU THE REAL ERROR IN YOUR TERMINAL:
+    print(f"!!!!!!!!!!!!!! REAL ERROR FROM GOOGLE !!!!!!!!!!!!!!")
+    print(e)
+    print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    st.stop() # <-- THIS IS THE FIX
 
 # --- Agent Definitions ---
 # Agent 1: The Triage Specialist
@@ -27,7 +46,7 @@ triage_agent = Agent(
         "a customer's comment and instantly understand its core intent. You are meticulous "
         "and ensure every item is correctly categorized for the right team."
     ),
-    llm=llm,
+    # llm=llm,
     verbose=True,
     allow_delegation=False
 )
@@ -41,7 +60,7 @@ bug_analyst_agent = Agent(
         "You don't just see 'the app crashed'; you see 'a pattern of crashes on the payment screen for iOS users'. "
         "You group similar bug reports to find the underlying problem."
     ),
-    llm=llm,
+    # llm=llm,
     verbose=True,
     allow_delegation=False
 )
@@ -55,7 +74,7 @@ feature_analyst_agent = Agent(
         "You can read 50 different requests for 'dark mode', 'night mode', and 'black screen' "
         "and correctly synthesize them into a single, high-priority request: 'User Demand for Dark Mode'."
     ),
-    llm=llm,
+    # llm=llm,
     verbose=True,
     allow_delegation=False
 )
@@ -69,7 +88,7 @@ report_agent = Agent(
         "Your reports are clear, data-driven, and actionable. You skip the fluff and get straight "
         "to the insights that matter for building a better product."
     ),
-    llm=llm,
+    # llm=llm,
     verbose=True,
     allow_delegation=False
 )
@@ -136,6 +155,7 @@ if uploaded_file is not None:
                 product_crew = Crew(
                     agents=[triage_agent, bug_analyst_agent, feature_analyst_agent, report_agent],
                     tasks=[triage_task, bug_analysis_task, feature_analysis_task, report_task],
+                    llm=llm,
                     process=Process.sequential, # Tasks will run one after another
                     verbose=True
                 )
