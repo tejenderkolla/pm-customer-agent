@@ -137,7 +137,7 @@ if uploaded_file is not None:
                     agents=[triage_agent, bug_analyst_agent, feature_analyst_agent, report_agent],
                     tasks=[triage_task, bug_analysis_task, feature_analysis_task, report_task],
                     process=Process.sequential, # Tasks will run one after another
-                    verbose=2
+                    verbose=True
                 )
 
                 # --- Run the Crew ---
