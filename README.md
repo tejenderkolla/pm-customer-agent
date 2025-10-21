@@ -4,7 +4,7 @@ An AI-powered agentic system to analyze and synthesize thousands of customer rev
 
 ## 🚀 Live Demo
 
-**Try the live application here:**  LINK
+**Try the live application here:**  
 
 ---
 
