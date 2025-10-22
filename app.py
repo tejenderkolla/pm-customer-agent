@@ -3,6 +3,7 @@ import pandas as pd
 from crewai import Agent, Task, Crew, Process
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+import os
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Voice of the Customer AI Agent", layout="wide")
@@ -11,30 +12,56 @@ st.markdown("Upload your customer feedback CSV, and the AI crew will analyze it 
 
 # Load the API key from Streamlit's secrets
 # --- API Key Setup ---
+# try:
+#     google_api_key = st.secrets["GOOGLE_API_KEY"]
+#     print("##########googleAPIKEY#######",google_api_key)
+#     print(f"DEBUG: Key retrieved successfully! Key starts with: {google_api_key[:4]}")
+#     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest",
+#                                  google_api_key=google_api_key,
+#                                  convert_system_message_to_human=True)
+    
+#     # This will print "DEBUG: LLM object..." to your terminal if it works
+#     print("DEBUG: LLM object created successfully!")
+
+# except KeyError:
+#     # This stops the app if the key is missing from the file
+#     st.error("🚨 GOOGLE_API_KEY not found. Please check your .streamlit/secrets.toml file.", icon="🚨")
+#     st.stop() 
+
+# except Exception as e:
+#     # This stops the app if the key is wrong or another error happens
+#     st.error(f"🚨 An error occurred while initializing the AI: {e}", icon="🚨")
+#     # THIS WILL SHOW YOU THE REAL ERROR IN YOUR TERMINAL:
+#     print(f"!!!!!!!!!!!!!! REAL ERROR FROM GOOGLE !!!!!!!!!!!!!!")
+#     print(e)
+#     print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+#     st.stop() 
+
+
+# --- API Key Setup ---
+# On Render, secrets are environment variables
+google_api_key = os.environ.get("GOOGLE_API_KEY")
+
+if not google_api_key:
+    # This error will show if the environment variable wasn't set in Render
+    st.error("🚨 GOOGLE_API_KEY environment variable not found. Please set it in your Render service settings.", icon="🚨")
+    st.stop()
+
+# Now, initialize the LLM
 try:
-    google_api_key = st.secrets["GOOGLE_API_KEY"]
-    print("##########googleAPIKEY#######",google_api_key)
-    print(f"DEBUG: Key retrieved successfully! Key starts with: {google_api_key[:4]}")
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest",
                                  google_api_key=google_api_key,
                                  convert_system_message_to_human=True)
-    
-    # This will print "DEBUG: LLM object..." to your terminal if it works
-    print("DEBUG: LLM object created successfully!")
 
-except KeyError:
-    # This stops the app if the key is missing from the file
-    st.error("🚨 GOOGLE_API_KEY not found. Please check your .streamlit/secrets.toml file.", icon="🚨")
-    st.stop() 
+    print("DEBUG: LLM object created successfully!") # Keep for debugging
 
 except Exception as e:
-    # This stops the app if the key is wrong or another error happens
-    st.error(f"🚨 An error occurred while initializing the AI: {e}", icon="🚨")
-    # THIS WILL SHOW YOU THE REAL ERROR IN YOUR TERMINAL:
+    # Catches errors if the key is invalid or the API isn't enabled
+    st.error(f"🚨 An error occurred while initializing the AI (check Render logs): {e}", icon="🚨")
     print(f"!!!!!!!!!!!!!! REAL ERROR FROM GOOGLE !!!!!!!!!!!!!!")
     print(e)
     print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    st.stop() 
+    st.stop()
 
 # --- Agent Definitions ---
 # Agent 1: The Triage Specialist
